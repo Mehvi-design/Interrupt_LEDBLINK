@@ -58,53 +58,45 @@ static void MX_USB_OTG_FS_PCD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void GPIO_Config(void){
-	//enable the GPIO clock
-	//RCC->AHB2ENR |=(1<<0);//port A is enable
+	
 	RCC->AHB2ENR |=(1<<0);
 	RCC->AHB2ENR |=(1<<2);
-	//for portB and port C (1<<1) or (1<<2)
-	//set the pin as output
-	//GPIOB->MODER |=(1<<28);//PIN 14B(BITS 29 ,28) AS OUTPUT MODE (01)
-	//GPIOB->MODER |=(1<<14);//PIN 7B(BITS 15 ,14) AS OUTPUT MODE (01)
-	GPIOC->MODER &= ~(3 << (13 * 2)); // Clear MODER13 (set as input) //PIN 13C(BITS 27,26) AS INPUT(00)
+	
+	GPIOC->MODER &= ~(3 << (13 * 2)); 
 	GPIOB->MODER &= ~(3 << (7 * 2));  // Clear mode
 	GPIOB->MODER |= (1 << (7 * 2));   // Set as output
 	GPIOB->MODER &= ~(3 << (14 * 2)); // Clear bits 29:28
 	GPIOB->MODER |=  (1 << (14 * 2)); // Set bit 28 to 1 (01 = output)
 
-	//configure output mode
-	//GPIOB->OTYPER=0;
-	//GPIOB->OSPEEDR=0;
-	//Configure pull up or pull down register
+	
 	GPIOC->PUPDR &= ~(3 << (13 * 2)); // Clear PUPD13
 	GPIOC->PUPDR |=  (2 << (13 * 2)); // Set to pull-down (10)
-//pull down mode(10)pin 27 is 1 and pin 26 is 0
+
 }
 void interrupt(void){
-	//enable the SYSCNFG bit in RCC Register
+
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
-	//Configure the EXTI configuration register in theSYSCNFG
+	
 	SYSCFG->EXTICR[3] &= ~(0xF << 4); // Clear EXTI13 bits
 	SYSCFG->EXTICR[3] |= (0x2 << 4);  // 0x2 = Port C
 
-	//DISABLETHE EXTI using Interrupt mask register (IMR)
+	
 	EXTI->IMR1 |=(1<<13);
-	//Configure the rising edge or falling trigger
+	
 	EXTI->FTSR1 |=(1<<13);//enable falling edge for pull down
 	EXTI->RTSR1 &=~(1<<13);
-	//Set the interrupt priority
+
 	NVIC_SetPriority(EXTI15_10_IRQn, 1);//lower the number highest the priority
 
-	//Enable the interrupt
+	
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 volatile int flag=0;
 volatile int count = 0;
 void EXTI15_10_IRQHandler(void){
-	//check the pin which triggered the interrupt
-	//clear the interrupt pending bit
+	
 	if(EXTI->PR1 & (1<<13)){ //if the interrupt is caused by  PR1
 		EXTI->PR1=(1<<13); //clear the interrupt pending bit
 		flag=1;
@@ -158,16 +150,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	//	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET);
-	//	  HAL_Delay(100);
-	//	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
-	//	  HAL_Delay(100);
-
-
-//		  GPIOB->BSRR |=(1<<7);//SET
-//		  HAL_Delay(100);
-//		  GPIOB->BSRR |=((1<<7)<<16);//RESET
-//		  HAL_Delay(100);
+	
 
 		 if(flag){
 
@@ -192,14 +175,12 @@ int main(void)
 			     count = 0;  // Reset count for next cycle
 			 }
 
-			 //GPIOB->BSRR |=(1<<7);//SET
+			
 
 			 flag=0;
 		 }
 
-		 //GPIOB->BSRR |=((1<<7)<<16);//RESET
-		 //HAL_Delay(100);
-
+		
 	  }
   /* USER CODE END 3 */
 }
